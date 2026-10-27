@@ -1,0 +1,29 @@
+name: Testplayer
+options:
+  bundleIdPrefix: com.tobit
+  deploymentTarget:
+    iOS: "16.4"
+settings:
+  base:
+    ARCHS: arm64
+    ONLY_ACTIVE_ARCH: NO
+    CLANG_ENABLE_OBJC_ARC: NO
+    CODE_SIGNING_ALLOWED: NO
+    CODE_SIGN_IDENTITY: ""
+    GCC_WARN_INHIBIT_ALL_WARNINGS: YES
+targets:
+  Testplayer:
+    type: application
+    platform: iOS
+    sources:
+      - path: Sources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.tobit.testplayer
+        INFOPLIST_FILE: Info.plist
+        TARGETED_DEVICE_FAMILY: "1,2"
+    postBuildScripts:
+      - name: Copy plugins
+        script: |
+          mkdir -p "${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Plugins"
+          cp -R "${SRCROOT}/Resources/Plugins/." "${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Plugins/"
