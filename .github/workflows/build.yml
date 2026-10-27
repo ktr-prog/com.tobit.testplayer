@@ -1,1 +1,34 @@
-
+name: Build unsigned IPA
+on:
+  push:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Generate project
+        run: xcodegen generate
+      - name: Build (arm64, unsigned)
+        run: |
+          set -o pipefail
+          xcodebuild -project Testplayer.xcodeproj -scheme Testplayer \
+            -configuration Release -sdk iphoneos -derivedDataPath build \
+            ARCHS=arm64 ONLY_ACTIVE_ARCH=NO CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
+            2>&1 | tee build.log | tail -n 200
+      - name: Package IPA
+        run: |
+          mkdir -p Payload
+          cp -R build/Build/Products/Release-iphoneos/Testplayer.app Payload/
+          zip -qr Testplayer.ipa Payload
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Testplayer-ipa
+          path: Testplayer.ipa
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: build-log
+          path: build.log
